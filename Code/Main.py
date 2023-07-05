@@ -30,6 +30,8 @@ def init_chrome():
     options.add_argument("--no-proxy-server") 
     options.add_argument("--disable-blink-features=AutomationControlled") 
 
+    options.add_argument('headless')
+
     exp_opt = [
         'enable-automation',
         'ignore-certificate-errors',
@@ -51,6 +53,8 @@ def init_chrome():
 
     driver = webdriver.Chrome(service=s, options=options)
     return driver
+
+
 if __name__ == '__main__':
     driver = init_chrome()# ("https://javhd.today/pornstar/tanaka-nene/")
     # input("Pulsa ENTER para salir")
@@ -63,55 +67,102 @@ if __name__ == '__main__':
     listaVideo = {}
     listaActress ={}
 
-    linkNext = "https://www4.javhdporn.net/pornstar/kokoro-ayase/"
-    
-    while linkNext != '':
-        driver.get(linkNext)
+    linkActress = "https://www4.javhdporn.net/pornstar/kokoro-ayase/"
+    linkMain = "https://www4.javhdporn.net/pornstars/"
 
-        nombre_video = driver.find_elements(By.CLASS_NAME, "loop-video") 
-        # print(nombre_video)
-        for video in nombre_video:
-            # titulo = video.find_element(By.CSS_SELECTOR,"span.video-title" )
-            
-            codename = video.find_element(By.CLASS_NAME,"entry-header").text#.split(" ")
-            # titulo = video.find_element(By.CLASS_NAME,"entry-header").text.split(" ")[1]
-            # thumb = video.find_element(By.CLASS_NAME,"video-preview").get_attribute("data-mediabook")
-            
-            actress = video.find_elements(By.CLASS_NAME,"byline")#.split(" ")
-            code = codename.split(" ")[0]
-            name = codename.removeprefix(f"{code} ")
+    conter= 0
+    while linkMain != "":
 
-            lActress = []
+        driver.get(linkMain)
 
-            for a in actress:
-                lActress.append(a.get_attribute('title'))
-
-            listaVideo[code] = name
-            listaActress[code] = lActress
-            # print(code)
-            # print(name)
-            # print(lActress)
-            # print(thumb)
-        # print(listaVideo)
-        # print(listaActress)
+        actressIndex = driver.find_elements(By.CLASS_NAME, "star") 
         
+        actressURL = []
+        
+        for a in actressIndex:
+             print (a.text)
+             actressSelector =    a.find_element(By.CSS_SELECTOR, 'a').get_attribute("href")
+             actressURL.append(actressSelector)
+        # print(actressIndex[0].text)
+
         navigation = driver.find_element(By.CLASS_NAME, 'pagination')
         buttonNavigate = navigation.find_elements(By.CSS_SELECTOR, 'a')
-        
+                
         currentAnt = False
-        
-        linkNext =''
+                
+        linkMain =''
         for b in buttonNavigate:
                 if currentAnt:
-                    linkNext = b.get_attribute('href')
+                    linkMain = b.get_attribute('href')
                     break
                 if b.get_attribute('class') =='current' and not currentAnt:
                     currentAnt = True
-                
-                
+        print(linkMain)
 
-        print(linkNext)
 
+
+        for url in actressURL:
+            driver.get(url)    
+            
+            # print(actressSelector)
+            # print(actressSelector.text)
+            
+            linkActress = url # actressSelector.get_attribute("href")
+            print("linkActress")
+            print(linkActress)
+
+            while linkActress != '':
+                driver.get(linkActress)
+
+                nombre_video = driver.find_elements(By.CLASS_NAME, "loop-video") 
+                # print(nombre_video)
+                for video in nombre_video:
+                    # titulo = video.find_element(By.CSS_SELECTOR,"span.video-title" )
+                    
+                    codename = video.find_element(By.CLASS_NAME,"entry-header").text#.split(" ")
+                    # titulo = video.find_element(By.CLASS_NAME,"entry-header").text.split(" ")[1]
+                    # thumb = video.find_element(By.CLASS_NAME,"video-preview").get_attribute("data-mediabook")
+                    
+                    actress = video.find_elements(By.CLASS_NAME,"byline")#.split(" ")
+                    code = codename.split(" ")[0]
+                    name = codename.removeprefix(f"{code} ")
+
+                    lActress = []
+
+                    for a in actress:
+                        lActress.append(a.get_attribute('title'))
+
+                    listaVideo[code] = name
+                    listaActress[code] = lActress
+                    # print(code)
+                    # print(name)
+                    # print(lActress)
+                    # print(thumb)
+                # print(listaVideo)
+                # print(listaActress)
+                
+                navigation = driver.find_element(By.CLASS_NAME, 'pagination')
+                buttonNavigate = navigation.find_elements(By.CSS_SELECTOR, 'a')
+                
+                currentAnt = False
+                
+                linkActress =''
+                for b in buttonNavigate:
+                        if currentAnt:
+                            linkActress = b.get_attribute('href')
+                            break
+                        if b.get_attribute('class') =='current' and not currentAnt:
+                            currentAnt = True
+                print(linkActress)
+                # break
+        
+
+
+        # linkMain = ""
+        print (linkMain)
+        # conter+=1
+        # if conter == 2: 
+        #     break
     
     # exit
     #guardar info en xlsx
@@ -125,8 +176,8 @@ if __name__ == '__main__':
     column = 0
 
     # worksheet.write("A1", "Hello world")
-    date_format = workbook.add_format()
-    date_format.set_num_format('dd/mm/yyyy hh:mm AM/PM')
+    # date_format = workbook.add_format()
+    # date_format.set_num_format('dd/mm/yyyy hh:mm AM/PM')
 
     worksheetTitulo.write(row,column,'Codigo')
     column+=1
